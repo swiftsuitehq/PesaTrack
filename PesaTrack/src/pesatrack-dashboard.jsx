@@ -54,6 +54,16 @@ const INITIAL_TRANSACTIONS = [
   { id: 12, date: isoDate(1), time: "02:05 PM", desc: "Wholesale order — hotel supply", category: "Wholesale", method: "Cash", amount: 11200, type: "sale" },
   { id: 13, date: isoDate(1), time: "04:30 PM", desc: "Service — delivery arrangement", category: "Service", method: "Card", amount: 2600, type: "sale" },
 ];
+const STORAGE_KEY = "pesatrack_transactions";
+
+function loadTransactions() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : INITIAL_TRANSACTIONS;
+  } catch {
+    return INITIAL_TRANSACTIONS;
+  }
+}
 
 const WEEKLY_TREND = [
   { day: "Mon", sales: 32400 },
@@ -349,7 +359,12 @@ export default function App() {
   const [editingSale, setEditingSale] = useState(null);
   const [expenseModalOpen, setExpenseModalOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
-  const [transactions, setTransactions] = useState(INITIAL_TRANSACTIONS);
+  const [transactions, setTransactions] = useState(loadTransactions);
+  
+  React.useEffect(() => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+}, [transactions]);
+
   const [mpesaBalance, setMpesaBalance] = useState(156780);
 
   const todaySales = useMemo(() => transactions.filter((t) => t.type === "sale" && t.date === isoDate(0)).reduce((s, t) => s + t.amount, 0), [transactions]);
